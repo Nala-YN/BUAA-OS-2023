@@ -29,7 +29,6 @@ int is_op_legal(char *op) {
 	}
 	return 0;
 }
-
 int get_num(char *str_num, int *num) {
 	*num = strtol(str_num, NULL, 10);
 	return *num > 0;
