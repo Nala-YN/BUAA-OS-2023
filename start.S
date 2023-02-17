@@ -25,7 +25,7 @@ EXPORT(_start_mips)
 	addiu	sp, sp, -24
 
 	lw      t1, var
-	li      t2, 5
+	li      t2, 5 ///test
 	/* use 'sw  t1, <x>(sp)' to store t1 at the proper place of the stack */
 	/* so that t1 is 5th argument of function hello */
 	/* Your code here. (4/6) */
