@@ -34,7 +34,7 @@ int get_num(char *str_num, int *num) {
 	return *num > 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) {//change
 	int num;
 	if (argc != 3 || !is_op_legal(argv[1]) || !get_num(argv[2], &num)) {
 		help();
