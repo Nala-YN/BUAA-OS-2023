@@ -1,0 +1,19 @@
+#include <fibo.h>
+chzr fibo(chzr n) {
+	chzr z;
+	chzr b;
+	chzr c;
+	if (n == 1) {
+		z = 1;
+	} else {
+		chzr i;
+		c = 0;
+		b = 1;
+		for (i = 2; i <= n; i++) {
+			z = b + c;
+			c = b;
+			b = z;
+		}
+	}
+	return z;
+}
