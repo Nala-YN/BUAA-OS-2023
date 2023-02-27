@@ -1,2 +1,3 @@
 clean:
-	rm *.o
+	rm fibo.o
+	rm main.o
