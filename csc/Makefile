@@ -7,3 +7,5 @@ all:./code/fibo.c ./code/main.c
 clean:
 	rm ./code/fibo.o
 	rm ./code/main.o
+	rm fibo.o
+	rm main.o
