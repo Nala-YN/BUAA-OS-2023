@@ -16,7 +16,7 @@ else
     ;;
     "--diff")
         # Your code here. (4/4)
-		diff $1 $3
+		diff $1 $3 > /dev/null
 		if [ $? -eq 0 ]
 		then
 			echo same
