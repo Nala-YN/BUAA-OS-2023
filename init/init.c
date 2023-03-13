@@ -4,7 +4,6 @@
 #include <pmap.h>
 #include <printk.h>
 #include <trap.h>
-
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
 #ifdef MOS_INIT_OVERRIDDEN

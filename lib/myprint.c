@@ -287,4 +287,3 @@ void print_num(fmt_callback_t out, void *data, unsigned long u, int base, int ne
 
 	out(data, buf, length);
 }
-
