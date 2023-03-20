@@ -16,6 +16,11 @@ void myoutput(void* data,const char* buf,size_t len){
 				*(buf+i)=0;
 				i++;
 			}
+			i++;
+			while(*(buf+i)!=0){
+				*(buf+i)=0;
+				i++;
+			}
             va_list ap;
               va_start(ap,fmt);
 	            vprintfmt(myoutput,buf,fmt,ap);
