@@ -22,10 +22,11 @@ void myoutput(void* data,const char* buf,size_t len){
               va_start(ap,fmt);
 	            vprintfmt(myoutput,buf,fmt,ap);
 				buf=(char*)buf;
+					i=0;
 		            while(*(buf+i)!=0){
 		                  i++;
 			           }
-						i--;
+					   i++;
 					   va_end(ap);
 			            return i;
 			     }
