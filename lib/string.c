@@ -23,10 +23,9 @@ void myoutput(void* data,const char* buf,size_t len){
 	            vprintfmt(myoutput,buf,fmt,ap);
 				buf=(char*)buf;
 					i=0;
-		            while(*(buf+i)!=0){
+		            while(*(buf+i)!=0&&*(buf+i)!='\n'){
 		                  i++;
 			           }
-					   i++;
 					   va_end(ap);
 			            return i;
 			     }
