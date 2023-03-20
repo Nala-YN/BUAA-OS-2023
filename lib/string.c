@@ -1,5 +1,32 @@
 #include <types.h>
-
+#include <print.h>
+void myoutput(void* data,const char* buf,size_t len){
+	char* temp=data;
+	while((*temp)!=0){
+		temp++;
+	}
+	for(int i=0;i<len;i++){
+		*temp=buf[i];
+		temp++;
+	}
+	*temp='\0';
+}
+ int sprintf(char *buf, const char *fmt, ...){
+ int i=0;
+			while(*(buf+i)!=0){
+				*(buf+i)=0;
+				i++;
+			}
+            va_list ap;
+              va_start(ap,fmt);
+	            vprintfmt(myoutput,buf,fmt,ap);
+				buf=(char*)buf;
+		            while(*(buf+i)!=0){
+		                  i++;
+			           }
+					   va_end(ap);
+			            return i;
+			     }
 void *memcpy(void *dst, const void *src, size_t n) {
 	void *dstaddr = dst;
 	void *max = dst + n;

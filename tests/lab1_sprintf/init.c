@@ -7,6 +7,8 @@ void sprintf_1_check() {
 }
 
 void mips_init() {
+	printk("%d",233);
 	sprintf_1_check();
+	printk("%d",114);
 	halt();
 }
