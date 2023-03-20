@@ -21,6 +21,7 @@ void myoutput(void* data,const char* buf,size_t len){
 				*(buf+i)=0;
 				i++;
 			}
+			memset(buf,0,sizeof(buf));
             va_list ap;
               va_start(ap,fmt);
 	            vprintfmt(myoutput,buf,fmt,ap);
