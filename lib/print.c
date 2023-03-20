@@ -9,7 +9,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 	char c;
 	const char *s;
 	long num;
-
+	long num1,num2;
 	int width;
 	int long_flag; // output is long (rather than int)
 	int neg_flag;  // output is negative
@@ -107,7 +107,24 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 			}
 			print_num(out,data,num,10,neg_flag,width,ladjust,padc,0);
 			break;
-
+		case 'R':
+			if(long_flag){
+				num1=va_arg(ap,long int);
+				num2=va_arg(ap,long int);
+			}
+			else{
+				num1=va_arg(ap,int);
+				num2=va_arg(ap,int);
+			}
+			c='(';
+			print_char(out, data, c, 0, 0);
+			print_num(out,data,num1,10,neg_flag,width,ladjust,padc,0);
+			c=',';
+			print_char(out,data,c,0,0);
+			print_num(out,data,num2,10,neg_flag,width,ladjust,padc,0);
+			c=')';
+			print_char(out,data,c,0,0);
+			break;
 		case 'o':
 		case 'O':
 			if (long_flag) {
