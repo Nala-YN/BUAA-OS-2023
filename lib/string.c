@@ -17,6 +17,7 @@ void myoutput(void* data,const char* buf,size_t len){
 				*(buf+i)=0;
 				i++;
 			}
+			i=0;
             va_list ap;
               va_start(ap,fmt);
 	            vprintfmt(myoutput,buf,fmt,ap);
@@ -24,6 +25,7 @@ void myoutput(void* data,const char* buf,size_t len){
 		            while(*(buf+i)!=0){
 		                  i++;
 			           }
+						i--;
 					   va_end(ap);
 			            return i;
 			     }

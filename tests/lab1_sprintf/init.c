@@ -1,9 +1,9 @@
 void sprintf_1_check() {
 	char str[100];
-	sprintf(str, "%d\n", 12321);
-	printk("%s", str);
-	sprintf(str, "%c\n", 97);
-	printk("%s", str);
+	int i=sprintf(str, "%d\n", 12321);
+	printk("%d\n%s",i, str);
+	i=sprintf(str, "%c\n", 97);
+	printk("%d\n%s",i, str);
 }
 
 void mips_init() {
