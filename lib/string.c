@@ -9,7 +9,6 @@ void myoutput(void* data,const char* buf,size_t len){
 		*temp=buf[i];
 		temp++;
 	}
-	*(temp+1)='\0';
 }
  int sprintf(char *buf, const char *fmt, ...){
  int i=0;
