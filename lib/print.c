@@ -117,10 +117,20 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 				num2=va_arg(ap,int);
 			}
 			c='(';
+			neg_flag=0;
+			if(num1<0){
+				neg_flag=1;
+				num1=-num1;
+			}
 			print_char(out, data, c, 0, 0);
 			print_num(out,data,num1,10,neg_flag,width,ladjust,padc,0);
 			c=',';
 			print_char(out,data,c,0,0);
+			neg_flag=0;
+			if(num2<0){
+				neg_flag=1;
+				num2=-num2;
+			}
 			print_num(out,data,num2,10,neg_flag,width,ladjust,padc,0);
 			c=')';
 			print_char(out,data,c,0,0);
