@@ -93,5 +93,5 @@ void mips_init() {
 
 	physical_memory_manage_check();
 	physical_memory_manage_strong_check();
-	halt();
+	
 }
