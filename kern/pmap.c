@@ -277,7 +277,21 @@ struct Page *page_lookup(Pde *pgdir, u_long va, Pte **ppte) {
 
 	return pp;
 }
-
+u_int page_perm_stat(Pde *pgdir, struct Page *pp, u_int perm_mask){
+	Pte* pte;
+	struct Page* now;
+	int i,j;
+	int cnt=0;
+	for(i=0;i<=1023;i++){
+		pte=(Pte*)(KADDR(PTE_ADDR((*(pgdir+i)))));
+		for(j=0;j<=1023;j++){
+			if(((*(pte+j)&0xfff)&perm_mask)==perm_mask&&(pte+j)&&(*(pte+j)&PTE_V)&&page2pa(pp)==PTE_ADDR(*(pte+j))){
+				cnt++;	
+			}
+		}
+	}
+	return cnt;
+}
 /* Overview:
  *   Decrease the 'pp_ref' value of Page 'pp'.
  *   When there's no references (mapped virtual address) to this page, release it.
