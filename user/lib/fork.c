@@ -1,7 +1,7 @@
 #include <env.h>
 #include <lib.h>
 #include <mmu.h>
-
+#include <error.h>
 /* Overview:
  *   Map the faulting page to a private writable copy.
  *
@@ -22,7 +22,7 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	 * 'PTE_COW', launch a 'user_panic'. */
 	/* Exercise 4.13: Your code here. (1/6) */
 	perm=(*(vpt+VPN(va)))&0xfff;
-	if(perm&PTE_COW==0){
+	if((perm&PTE_COW)==0){
 		user_panic("User pgfault face a not COW page!");
 	}
 	/* Step 2: Remove 'PTE_COW' from the 'perm', and add 'PTE_D' to it. */
@@ -81,7 +81,6 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
  *     'sys_mem_map' in kernel.
  */
 static void duppage(u_int envid, u_int vpn) {
-	int r;
 	u_int addr;
 	u_int perm;
 
