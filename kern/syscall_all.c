@@ -481,7 +481,52 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 
 	return 0;
 }
+void sys_set_gid(u_int gid){
+	curenv->env_gid=gid;
+}
+int sys_group_send(u_int envid, u_int value, u_int srcva, u_int perm){
+	struct Env *e; 
+    struct Page *p; 
+    Pte* pte;
+    /* Step 1: Check if 'srcva' is either zero or a legal address. */
+    /* Exercise 4.8: Your code here. (4/8) */
+    if(is_illegal_va(srcva)&&srcva!=0){
+        return -E_INVAL;
+    }   
+    /* Step 2: Convert 'envid' to 'struct Env *e'. */
+    /* This is the only syscall where the 'envid2env' should be used with 'checkperm' UNSET,
+     * because the target env is not restricted to 'curenv''s children. */
+    /* Exercise 4.8: Your code here. (5/8) */
+    try(envid2env(envid,&e,0));
+    /* Step 3: Check if the target is waiting for a message. */
+    /* Exercise 4.8: Your code here. (6/8) */
+    if(e->env_ipc_recving==0){
+        return -E_IPC_NOT_RECV;
+    }   
+    /* Step 4: Set the target's ipc fields. */
+	if(e->env_gid!=curenv->env_gid){
+		return -E_IPC_NOT_GROUP;
+	}
+    e->env_ipc_value = value;
+    e->env_ipc_from = curenv->env_id;
+    e->env_ipc_perm = PTE_V | perm;
+    e->env_ipc_recving = 0;
 
+    /* Step 5: Set the target's status to 'ENV_RUNNABLE' again and insert it to the tail of
+     * 'env_sched_list'. */
+    /* Exercise 4.8: Your code here. (7/8) */
+    e->env_status=ENV_RUNNABLE;
+    TAILQ_INSERT_TAIL(&env_sched_list,e,env_sched_link);
+	 if (srcva != 0) {
+        /* Exercise 4.8: Your code here. (8/8) */
+        p=page_lookup(curenv->env_pgdir,srcva,&pte);
+        if(p==NULL){
+            return -E_INVAL;
+        }
+        try(page_insert(e->env_pgdir,e->env_asid,p,e->env_ipc_dstva,perm));
+    }
+    return 0;	
+}
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -501,6 +546,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_set_gid]=sys_set_gid,
+	[SYS_group_send]=sys_group_send,
 };
 
 /* Overview:

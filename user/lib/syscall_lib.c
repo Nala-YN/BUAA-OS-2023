@@ -47,7 +47,12 @@ int syscall_set_env_status(u_int envid, u_int status) {
 int syscall_set_trapframe(u_int envid, struct Trapframe *tf) {
 	return msyscall(SYS_set_trapframe, envid, tf);
 }
-
+void syscall_set_gid(u_int gid){
+	msyscall(SYS_set_gid,gid);
+}
+int syscall_ipc_try_group_send(u_int whom, u_int val, const void *srcva, u_int perm){
+	return msyscall(SYS_group_send,whom,val,(u_int)srcva,perm);
+}
 void syscall_panic(const char *msg) {
 	int r = msyscall(SYS_panic, msg);
 	user_panic("SYS_panic returned %d", r);
