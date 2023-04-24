@@ -72,7 +72,7 @@ int syscall_read_dev(void *, u_int, u_int);
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm);
-
+void ipc_broadcast(u_int val, void * srcva, u_int perm);
 // wait.c
 void wait(u_int envid);
 

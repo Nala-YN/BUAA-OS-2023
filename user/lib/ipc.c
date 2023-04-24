@@ -37,3 +37,21 @@ u_int ipc_recv(u_int *whom, void *dstva, u_int *perm) {
 
 	return env->env_ipc_value;
 }
+int top=0;
+u_int goal[100];
+void find_son(u_int envid){
+	for(int i=0;i<=100;i++){
+            if(envs[i].env_parent_id==envid){
+                goal[top]=envs[i].env_id;
+                top++;
+				find_son(envs[i].env_id);
+            }   
+        }   
+}
+void ipc_broadcast(u_int val, void * srcva, u_int perm){
+	top=0;
+	find_son(env->env_id);
+	for(int i=0;i<=top-1;i++){
+		ipc_send(goal[i],val,srcva,perm);
+	}
+}
