@@ -28,11 +28,31 @@
 void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
 	u_int begin = secno * BY2SECT;
 	u_int end = begin + nsecs * BY2SECT;
-
+	u_int rw=DEV_DISK_OPERATION_READ;
+	u_int curoff;
+	u_int diskreturn;
 	for (u_int off = 0; begin + off < end; off += BY2SECT) {
 		uint32_t temp = diskno;
+		curoff=begin+off;
 		/* Exercise 5.3: Your code here. (1/2) */
-
+		if(syscall_write_dev(&temp,DEV_DISK_ADDRESS+DEV_DISK_ID,4)!=0){
+			user_panic("write disk id error");
+		}
+		if(syscall_write_dev(&curoff,DEV_DISK_ADDRESS+DEV_DISK_OFFSET,4)!=0){
+			user_panic("write disk offset error");
+		}
+		if(syscall_write_dev(&rw,DEV_DISK_ADDRESS+DEV_DISK_START_OPERATION,4)!=0){
+			user_panic("write disk start operation error");
+		}
+		if(syscall_read_dev(&diskreturn,DEV_DISK_ADDRESS+DEV_DISK_STATUS,4)!=0){
+			user_panic("read disk status error");
+		}
+		if(diskreturn==0){
+			user_panic("read failed\n");
+		}
+		if(syscall_read_dev(dst+off,DEV_DISK_ADDRESS+DEV_DISK_BUFFER,BY2SECT)!=0){
+			user_panic("read disk content error");
+		}
 	}
 }
 
@@ -55,10 +75,30 @@ void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
 void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
 	u_int begin = secno * BY2SECT;
 	u_int end = begin + nsecs * BY2SECT;
-
+	u_int rw=DEV_DISK_OPERATION_WRITE;
+	u_int curoff;
+	u_int diskreturn;
 	for (u_int off = 0; begin + off < end; off += BY2SECT) {
 		uint32_t temp = diskno;
 		/* Exercise 5.3: Your code here. (2/2) */
-
+		curoff=begin+off;
+		if(syscall_write_dev(&temp,DEV_DISK_ADDRESS+DEV_DISK_ID,4)!=0){
+			user_panic("write disk id error");
+		}
+		if(syscall_write_dev(&curoff,DEV_DISK_ADDRESS+DEV_DISK_OFFSET,4)!=0){
+			user_panic("write disk offset error");
+		}
+		if(syscall_write_dev(src+off,DEV_DISK_ADDRESS+DEV_DISK_BUFFER,BY2SECT)!=0){
+			user_panic("write disk content error");
+		}
+		if(syscall_write_dev(&rw,DEV_DISK_ADDRESS+DEV_DISK_START_OPERATION,4)!=0){
+			user_panic("write disk start operation error");
+		}
+		if(syscall_read_dev(&diskreturn,DEV_DISK_ADDRESS+DEV_DISK_STATUS,4)!=0){
+			user_panic("read disk status error");
+		}
+		if(diskreturn==0){
+			user_panic("write failed\n");
+		}
 	}
 }
