@@ -42,7 +42,8 @@ void _user_halt(const char *, int, const char *, ...) __attribute__((noreturn));
 int spawn(char *prog, char **argv);
 int spawnl(char *prot, char *args, ...);
 int fork(void);
-
+void barrier_wait(void);
+void barrier_alloc(int n);
 /// syscalls
 extern int msyscall(int, ...);
 
@@ -55,6 +56,8 @@ int syscall_set_tlb_mod_entry(u_int envid, void (*func)(struct Trapframe *));
 int syscall_mem_alloc(u_int envid, void *va, u_int perm);
 int syscall_mem_map(u_int srcid, void *srcva, u_int dstid, void *dstva, u_int perm);
 int syscall_mem_unmap(u_int envid, void *va);
+int syscall_try_wait(void);
+void syscall_ba_alloc(int n);
 
 __attribute__((always_inline)) inline static int syscall_exofork(void) {
 	return msyscall(SYS_exofork, 0, 0, 0, 0, 0);

@@ -21,6 +21,14 @@ void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm) {
 // in *whom.
 //
 // Hint: use env to discover the value and who sent it.
+void barrier_alloc(int n){
+	syscall_ba_alloc(n);
+}
+void barrier_wait(void){
+    while (syscall_try_wait() == 1) {
+        syscall_yield();
+    }    
+}
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm) {
 	int r = syscall_ipc_recv(dstva);
 	if (r != 0) {

@@ -481,7 +481,39 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 
 	return 0;
 }
-
+u_int id[100];
+u_int top=0;
+int ba_num=0;
+void sys_ba_alloc(int n){
+	ba_num=n;
+}
+int sys_wait(){
+    u_int i;
+    int flag=0;
+    for(i=0;i<=top-1;i++){
+        if(curenv->env_id==id[i]){
+            flag=1;
+            break;
+        }
+    }
+    if(flag==1){
+        return 1;
+    }
+    else{
+        ba_num--;
+        if(ba_num<0){
+            ba_num=0;
+        }
+        if(ba_num==0){
+            return 0;
+        }
+        else{
+            id[top]=curenv->env_id;
+            top++;
+            return 1;
+        }
+    }
+}
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -501,6 +533,8 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_wait]= sys_wait,
+	[SYS_ba_alloc]=sys_ba_alloc,
 };
 
 /* Overview:
