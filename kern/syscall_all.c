@@ -488,29 +488,30 @@ void sys_ba_alloc(int n){
 	ba_num=n;
 }
 int sys_wait(){
-    int i;
-    int flag=0;
-	if(ba_num==0){
-		return 0;
-	}
-    for(i=0;i<=top-1;i++){
-        if((curenv->env_id)==id[i]){
-            flag=1;
-            break;
-        }
-    }
-    if(flag==1){
-        return 1;
-    }
-    else{
-        ba_num--;
 		if(ba_num==0){
+			return 0;
+		}
+        ba_num--;
+		int i;
+		if(ba_num==0){
+			for(i=0;i<=top-1;i++){
+				struct Env* e;
+				envid2env(id[i],&e,0);
+				e->env_status=ENV_RUNNABLE;
+				TAILQ_INSERT_TAIL(&env_sched_list,e,env_sched_link);
+			}
 			return 0;
 		}
         id[top]=curenv->env_id;
         top++;
-        return 1;
-    }
+		curenv->env_status = ENV_NOT_RUNNABLE;
+		TAILQ_REMOVE(&env_sched_list,curenv,env_sched_link);
+		//printk("removed ba_num:%d\n",ba_num);
+		struct Env* e;
+		//TAILQ_FOREACH(e, &env_sched_list, env_sched_link){
+		//	printk("id:%x\n",e->env_id);
+		//}
+		schedule(1);
 }
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,

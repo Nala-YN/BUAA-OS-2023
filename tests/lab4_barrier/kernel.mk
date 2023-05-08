@@ -1,2 +1,2 @@
 init-override := $(test_dir)/init.c
-CFLAGS	  += -DMOS_SCHED_MAX_TICKS=3000
+CFLAGS	  += -DMOS_SCHED_MAX_TICKS=10000

@@ -25,9 +25,7 @@ void barrier_alloc(int n){
 	syscall_ba_alloc(n);
 }
 void barrier_wait(void){
-    while (syscall_try_wait() == 1) {
-        syscall_yield();
-    }    
+    syscall_try_wait();    
 }
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm) {
 	int r = syscall_ipc_recv(dstva);
