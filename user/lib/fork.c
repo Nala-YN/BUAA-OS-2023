@@ -118,7 +118,6 @@ int fork(void) {
 	u_int child;
 	u_int i;
 	extern volatile struct Env *env;
-
 	/* Step 1: Set our TLB Mod user exception entry to 'cow_entry' if not done yet. */
 	if (env->env_user_tlb_mod_entry != (u_int)cow_entry) {
 		try(syscall_set_tlb_mod_entry(0, cow_entry));
@@ -132,7 +131,6 @@ int fork(void) {
 		env = envs + ENVX(syscall_getenvid());
 		return 0;
 	}
-
 	/* Step 3: Map all mapped pages below 'USTACKTOP' into the child's address space. */
 	// Hint: You should use 'duppage'.
 	/* Exercise 4.15: Your code here. (1/2) */

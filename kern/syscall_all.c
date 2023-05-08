@@ -482,13 +482,13 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return 0;
 }
 u_int id[100];
-u_int top=0;
+int top=0;
 int ba_num=0;
 void sys_ba_alloc(int n){
 	ba_num=n;
 }
 int sys_wait(){
-    u_int i;
+    int i;
     int flag=0;
     for(i=0;i<=top-1;i++){
         if(curenv->env_id==id[i]){
