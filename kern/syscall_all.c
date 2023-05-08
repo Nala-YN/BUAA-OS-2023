@@ -490,6 +490,9 @@ void sys_ba_alloc(int n){
 int sys_wait(){
     int i;
     int flag=0;
+	if(ba_num==0){
+		return 0;
+	}
     for(i=0;i<=top-1;i++){
         if(curenv->env_id==id[i]){
             flag=1;
