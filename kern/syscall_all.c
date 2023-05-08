@@ -494,7 +494,7 @@ int sys_wait(){
 		return 0;
 	}
     for(i=0;i<=top-1;i++){
-        if(curenv->env_id==id[i]){
+        if((curenv->env_id)==id[i]){
             flag=1;
             break;
         }
@@ -504,17 +504,12 @@ int sys_wait(){
     }
     else{
         ba_num--;
-        if(ba_num<0){
-            ba_num=0;
-        }
-        if(ba_num==0){
-            return 0;
-        }
-        else{
-            id[top]=curenv->env_id;
-            top++;
-            return 1;
-        }
+		if(ba_num==0){
+			return 0;
+		}
+        id[top]=curenv->env_id;
+        top++;
+        return 1;
     }
 }
 void *syscall_table[MAX_SYSNO] = {
