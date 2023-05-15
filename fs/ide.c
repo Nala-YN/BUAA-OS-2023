@@ -69,7 +69,12 @@ void ssd_write(u_int logic_no, void *src){
 		ide_read(0,goal0,buf,1);
 		ide_write(0,goal,buf,1);
 		writble[goal]=0;
-		map[goal0]=goal;
+		for(int i=0;i<=31;i++){
+			if(map[i]==goal0){
+				map[i]=goal;
+				break;
+			}
+		}
 		memset(buf,0,512);
 		ide_write(0,goal0,buf,1);
 		write_cnt[goal0]++;
