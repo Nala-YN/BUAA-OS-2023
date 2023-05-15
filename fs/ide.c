@@ -25,6 +25,72 @@
 // Hint: Use the physical address and offsets defined in 'include/drivers/dev_disk.h':
 //  'DEV_DISK_ADDRESS', 'DEV_DISK_ID', 'DEV_DISK_OFFSET', 'DEV_DISK_OPERATION_READ',
 //  'DEV_DISK_START_OPERATION', 'DEV_DISK_STATUS', 'DEV_DISK_BUFFER'
+int map[40];
+int writble[40];
+int write_cnt[40];
+void ssd_init(){
+	int i=0;
+	for(i=0;i<=31;i++){
+		map[i]=-1;
+		writble[i]=1;
+		write_cnt[i]=0;		
+	}
+}
+int ssd_read(u_int logic_no, void *dst){
+	if(map[logic_no]==-1){
+		return -1;
+	}
+	debugf("map:%d\n",map[logic_no]);
+	ide_read(0,map[logic_no],dst,1);
+	return 0;
+}
+void ssd_write(u_int logic_no, void *src){
+	int cnt=100000;
+	int goal=0;
+	if(map[logic_no]!=-1){
+		ssd_erase(logic_no);
+	}
+	for(int i=0;i<=31;i++){
+		if(writble[i]==1&&write_cnt[i]<cnt){
+			goal=i;
+			cnt=write_cnt[i];
+		}
+	}
+	if(cnt>=5){
+		int cnt0=100000;
+		int goal0=0;
+		for(int i=0;i<=31;i++){
+			if(writble[i]==0&&write_cnt[i]<cnt0){
+				goal0=i;
+				cnt0=write_cnt[i];
+			}
+		}
+		char buf[512];
+		ide_read(0,goal0,buf,1);
+		ide_write(0,goal,buf,1);
+		writble[goal]=0;
+		map[goal0]=goal;
+		memset(buf,0,512);
+		ide_write(0,goal0,buf,1);
+		write_cnt[goal0]++;
+		writble[goal0]=1;
+		goal=goal0;
+	}
+	ide_write(0,goal,src,1);
+	writble[goal]=0;
+	map[logic_no]=goal;
+}
+void ssd_erase(u_int logic_no){
+	if(map[logic_no]==-1){
+		return;
+	}
+	char buf[512];
+	memset(buf,0,512);
+	ide_write(0,map[logic_no],buf,1);
+	write_cnt[map[logic_no]]++;
+	writble[map[logic_no]]=1;
+	map[logic_no]=-1;
+}
 void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
 	u_int begin = secno * BY2SECT;
 	u_int end = begin + nsecs * BY2SECT;

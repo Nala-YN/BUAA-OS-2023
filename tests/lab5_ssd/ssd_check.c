@@ -23,6 +23,7 @@ int main() {
 	}
 	for (int i = 0; i < 16; i++) {
 		if (ssd_read_number(i) != i * i) {
+			debugf("%d %d\n",ssd_read_number(i),i*i);
 			user_panic("READ_ERROR");
 		}
 	}
