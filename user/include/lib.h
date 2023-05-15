@@ -42,7 +42,8 @@ void _user_halt(const char *, int, const char *, ...) __attribute__((noreturn));
 int spawn(char *prog, char **argv);
 int spawnl(char *prot, char *args, ...);
 int fork(void);
-
+u_int get_time(u_int *us);
+void usleep(u_int us);
 /// syscalls
 extern int msyscall(int, ...);
 
