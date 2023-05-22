@@ -34,6 +34,11 @@ ifeq ($(call lab-ge,6), true)
 			ls.b \
 			sh.b  \
 			cat.b \
+			tree.b \
+			run.b \
+			history.b \
+			mkdir.b \
+			touch.b \
 			testpipe.b \
 			testpiperace.b \
 			testptelibrary.b \

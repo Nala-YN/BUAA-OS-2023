@@ -25,6 +25,7 @@ void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs);
 int file_open(char *path, struct File **pfile);
 int file_get_block(struct File *f, u_int blockno, void **pblk);
 int file_set_size(struct File *f, u_int newsize);
+int file_creat(char* path,struct File** file);
 void file_close(struct File *f);
 int file_remove(char *path);
 int file_dirty(struct File *f, u_int offset);

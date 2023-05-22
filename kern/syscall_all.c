@@ -503,7 +503,116 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	}
 	return 0;
 }
-
+struct GlobalEnvVar{
+	char name[16];
+	char var[16];
+	int read_only;
+}globalVar[64];
+struct LocalEnvVar{
+	char name[16];
+	char var[16];
+	int read_only;
+	int sh_id;
+}localVar[64];
+int globalVarTop=0;
+int localVarTop=0;
+int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
+	if(islocal){
+		 int flag=0;
+        for(i=0;i<=localVarTop-1;i++){
+            if(strcmp(localVar[i].name,name)==0&&localVar[i].sh_id==sh_id){
+                flag=1;
+                break;
+            }
+        }
+        if(flag){
+            debugf("Already hava a var named %s.So it is replaced by %s",name,var);
+            strcpy(localVar[i].var,var);
+            localVar[i].read_only=read_only;
+            return 0;
+        }
+        strcpy(localVar[localVarTop].name,name);
+        strcpy(localVar[localVarTop].var,var);
+        localVar[localVarTop].read_only=read_only;
+        localVarTop++;
+        printk("%s is set as %s",name,var);
+		return 0;
+	}
+	int flag=0;
+        for(i=0;i<=globalVarTop-1;i++){
+            if(strcmp(globalVar[i].name,name)==0){
+                flag=1;
+                break;
+            }
+        }
+        if(flag){
+            printk("Already hava a var named %s.So it is replaced by %s\n",name,var);
+			strcpy(globalVar[i].var,var);
+			globalVar[i].read_only=read_only;
+            return 0;
+        }
+        strcpy(globalVar[globalVarTop].name,name);
+        strcpy(globalVar[globalVarTop].var,var);
+		globalVar[globalVarTop].read_only=read_only;
+        globalVarTop++;
+        printk("%s is set as %s",name,var);
+	return 0;
+}
+int sys_list_var(int sh_id){
+	 printk("Local var is listed as below\n");
+    for(i=0;i<=localVarTop-1;i++){
+			if(localVar[i].sh_id==sh_id)printk("name:%s var:%s\n",localVar[i].name,localVar[i].var);
+    }
+     printk("List ended\n");
+	printk("Global var is listed as below\n");
+    for(int i=0;i<=globalVarTop-1;i++){
+         printk("name:%s var:%s\n",globalVar[i].name,globalVar[i].var);
+    }
+    printk("List ended\n");
+	return 0;
+}
+int sys_unset_var(int sh_id,char* name){
+	int i,j;
+    for(int i;i<=localVarTop-1;i++){
+        if(strcmp(localVar[i].name,name)==0&&localVar[i].read_only==0&&sh_id==localVar[i].sh_id){
+            for(j=i;j<=localVarTop-2;j++){
+                localVar[j]=localVar[j+1];
+            }
+            localVarTop--;
+            break;
+        }
+    }
+    for(int i;i<=globalVarTop-1;i++){
+        if(strcmp(globalVar[i].name,name)==0&&globalVar[i].read_only==0){
+            for(j=i;j<=globalVarTop-2;j++){
+                globalVar[j]=globalVar[j+1];
+            }
+            globalVarTop--;
+            break;
+        }
+    }
+	return 0;	
+}
+int sys_find_var(int sh_id,char* name,char* rval){
+	for(int i=0;i<=localVarTop-1;i++){
+        if(strcmp(localVar[i].name,name)==0&&localVar[i].sh_id==sh_id){
+            strcpy(rval,localVar[i].var);
+            return 1;
+        }
+    }
+	 for(int i=0;i<=globalVarTop-1;i++){
+        if(strcmp(globalVar[i].name,name)==0){
+            strcpy(rval,globalVar[i].var);
+            return 1;
+        }
+    }
+    return 0;
+}
+int now_sh_id=0;
+int sys_get_sh_id(){
+	now_sh_id++;
+	return now_sh_id;
+}
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -523,6 +632,11 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_set_var]=sys_set_var,
+	[SYS_list_var]=sys_list_var,
+	[SYS_unset_var]=sys_unset_var,
+	[SYS_find_var]=sys_get_var,
+	[SYS_get_sh_id]=sys_get_sh_id,
 };
 
 /* Overview:

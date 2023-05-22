@@ -663,7 +663,7 @@ int file_open(char *path, struct File **file) {
 // Post-Condition:
 //  On success set *file to point at the file and return 0.
 //  On error return < 0.
-int file_create(char *path, struct File **file) {
+int file_creat(char *path, struct File **file) {
 	char name[MAXNAMELEN];
 	int r;
 	struct File *dir, *f;

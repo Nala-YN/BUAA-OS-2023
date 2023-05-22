@@ -25,6 +25,11 @@ struct Dev devfile = {
 // Returns:
 //  the file descriptor on success,
 //  the underlying error on failure.
+int user_creat(const char*path,int isdir){
+	char buf[1024];
+	strcpy(buf,path);
+	return fsipc_creat(buf,isdir);
+}
 int open(const char *path, int mode) {
 	int r;
 

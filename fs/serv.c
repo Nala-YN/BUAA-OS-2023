@@ -84,7 +84,14 @@ int open_lookup(u_int envid, u_int fileid, struct Open **po) {
 // Serve requests, sending responses back to envid.
 // To send a result back, ipc_send(envid, r, 0, 0).
 // To include a page, ipc_send(envid, r, srcva, perm).
-
+void serve_creat(u_int envid,struct Fsreq_creat *rq){
+	struct File *f;
+	int r=file_creat(rq->req_path,&f);
+	if(r>=0){
+		f->f_type=rq->isdir;
+	}
+	ipc_send(envid,r,0,0);
+}
 void serve_open(u_int envid, struct Fsreq_open *rq) {
 	struct File *f;
 	struct Filefd *ff;
@@ -227,7 +234,9 @@ void serve(void) {
 		case FSREQ_SET_SIZE:
 			serve_set_size(whom, (struct Fsreq_set_size *)REQVA);
 			break;
-
+		case FSREQ_CREAT:
+			serve_creat(whom,(struct Fsreq_creat*)REQVA);
+			break;
 		case FSREQ_CLOSE:
 			serve_close(whom, (struct Fsreq_close *)REQVA);
 			break;

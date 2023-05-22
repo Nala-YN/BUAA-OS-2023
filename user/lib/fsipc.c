@@ -33,6 +33,13 @@ static int fsipc(u_int type, void *fsreq, void *dstva, u_int *perm) {
 // Returns:
 //  0 on success,
 //  < 0 on failure.
+int fsipc_creat(const char* path,int isdir){
+	struct Fsreq_creat *req;
+	req=(struct Fsreq_creat*)fsipcbuf;
+	strcpy((char*)req->req_path,path);
+	req->isdir=isdir;
+	return fsipc(FSREQ_CREAT,req,0,0);
+}
 int fsipc_open(const char *path, u_int omode, struct Fd *fd) {
 	u_int perm;
 	struct Fsreq_open *req;

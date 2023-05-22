@@ -1,6 +1,5 @@
 /* simple command line parser from Plan 9 -- you are not expected to understand this */
 /* see http://plan9.bell-labs.com/magic/man2html/2/arg */
-
 #define _ARGSET(x) (x) = 0
 #define _ARGUSED(x)                                                                                \
 	if (x) {                                                                                   \

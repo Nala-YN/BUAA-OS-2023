@@ -59,7 +59,7 @@ int syscall_mem_unmap(u_int envid, void *va);
 __attribute__((always_inline)) inline static int syscall_exofork(void) {
 	return msyscall(SYS_exofork, 0, 0, 0, 0, 0);
 }
-
+void syscall_list_global_var();
 int syscall_set_env_status(u_int envid, u_int status);
 int syscall_set_trapframe(u_int envid, struct Trapframe *tf);
 void syscall_panic(const char *msg) __attribute__((noreturn));
@@ -68,7 +68,11 @@ int syscall_ipc_recv(void *dstva);
 int syscall_cgetc();
 int syscall_write_dev(void *, u_int, u_int);
 int syscall_read_dev(void *, u_int, u_int);
-
+int syscall_set_var(int sh_id,char* name,char* var,int read_only,int islocal);
+int syscall_get_sh_id();
+int syscall_find_var(int sh_id,char* name,char* rval);
+int syscall_unset_var(int sh_id,char* name);
+int syscall_list_var(int sh_id);
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm);
@@ -100,7 +104,7 @@ int fsipc_dirty(u_int, u_int);
 int fsipc_remove(const char *);
 int fsipc_sync(void);
 int fsipc_incref(u_int);
-
+int fsipc_creat(const char *,int );
 // fd.c
 int close(int fd);
 int read(int fd, void *buf, u_int nbytes);
@@ -114,6 +118,7 @@ int stat(const char *path, struct Stat *);
 
 // file.c
 int open(const char *path, int mode);
+int user_creat(const char* path,int isdir);
 int read_map(int fd, u_int offset, void **blk);
 int remove(const char *path);
 int ftruncate(int fd, u_int size);
@@ -130,7 +135,6 @@ int sync(void);
 #define O_WRONLY 0x0001	 /* open for writing only */
 #define O_RDWR 0x0002	 /* open for reading and writing */
 #define O_ACCMODE 0x0003 /* mask for above modes */
-
 // Unimplemented open modes
 #define O_CREAT 0x0100 /* create if nonexistent */
 #define O_TRUNC 0x0200 /* truncate to zero length */

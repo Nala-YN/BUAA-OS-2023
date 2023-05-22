@@ -3,7 +3,7 @@
 
 #define WHITESPACE " \t\r\n"
 #define SYMBOLS "<|>&;()"
-
+#define maxEnvVar 64
 /* Overview:
  *   Parse the next token from the string at s.
  *
@@ -19,6 +19,46 @@
  *   The buffer is modified to turn the spaces after words into zero bytes ('\0'), so that the
  *   returned token is a null-terminated string.
  */
+int get_var(char* name,char* rval){
+	return syscall_find_var(sh_id,name,rval);
+}
+int unset_var(char* name){
+	return syscall_unset_var(sh_id,name);
+}
+int unset(int argc,char** argv){
+	char name[16]={0};
+	strcpy(name,argv[1]);
+	unset_var(name);
+	return 0;
+}
+int declare(int argc,char** argv){
+	int readonly=0;
+	int isglobal=0;
+	char name[16]={0};
+	char var[16]={0};
+	int i;
+	ARGBEGIN {
+		case 'x':
+			islocal=1;
+			break;
+		case 'r':
+			readonly=1;
+			break;
+        default:
+			break;
+    ARGEND
+	if(argc==1){
+		syscall_list_var(sh_id);
+		return 0;
+	}
+	if(argc>1){
+		strcpy(name,argv[1]);
+	}
+	if(argc>2){
+		strcpy(var,argv[2]);
+	}
+	return syscall_set_var(sh_id,name,var,readonly,islocal);
+}
 int _gettoken(char *s, char **p1, char **p2) {
 	*p1 = 0;
 	*p2 = 0;
@@ -106,6 +146,14 @@ int parsecmd(char **argv, int *rightpipe) {
             dup(fd, 1);
             close(fd);
 			break;
+		/*case ';':
+			if ((rightpipe = (int*)fork()) == 0) {
+                    return parsecmd(argv,rightpipe);
+                } else {
+					rightpipe=0;
+                    return argc;
+                }
+                break;*/	
 		case '|':;
 			/*
 			 * First, allocate a pipe.
@@ -169,27 +217,79 @@ void runcmd(char *s) {
 
 void readline(char *buf, u_int n) {
 	int r;
+	int place=0;
+	char temp;
 	for (int i = 0; i < n; i++) {
+		//debugf("i:%d\n",i);
 		if ((r = read(0, buf + i, 1)) != 1) {
 			if (r < 0) {
 				debugf("read error: %d\n", r);
 			}
 			exit();
 		}
-		if (buf[i] == '\b' || buf[i] == 0x7f) {
-			if (i > 0) {
-				i -= 2;
-			} else {
-				i = -1;
-			}
-			if (buf[i] != '\b') {
-				printf("\b");
-			}
-		}
 		if (buf[i] == '\r' || buf[i] == '\n') {
-			buf[i] = 0;
-			return;
+            debugf("\n");
+            buf[i] = 0;
+            return;
+        }
+		//debugf("i:%d place:%d\n",i,place); 
+		if(buf[i]==27){
+			//debugf("i:%d place:%d\n",i,place);
+			read(0,&temp,1);
+			read(0,&temp,1);
+			if(temp=='D'){
+				if(place-1>=0){
+					place--;
+					debugf("%c%c%c",27,91,68);
+				}		
+			}
+			else if(temp=='C'){
+				if(place+1<=i){
+					place++;
+					debugf("%c%c%c",27,91,67);
+				}
+			}
+			i--;
+			continue;
 		}
+		else if(buf[i]=='\b'||buf[i]==0x7f){
+			i--;
+			if(place>0){
+				for(int j=place-1;j<=i-1;j++){
+					buf[j]=buf[j+1];			
+				}
+				debugf("%c%c%c",27,91,68);
+				for(int j=0;j<=i-place+1;j++){
+					debugf(" ");
+				}
+				for(int j=0;j<=i-place+1;j++){
+					debugf("%c%c%c",27,91,68);
+				}
+				for(int j=place-1;j<=i-1;j++){
+					debugf("%c",buf[j]);
+				}
+				for(int j=place-1;j<=i-1;j++){
+					debugf("\b");
+				}
+				i--;
+				place--;	
+			}
+		}
+		else{
+			temp=buf[i];
+			for(int j=i;j>=place+1;j--){
+				buf[j]=buf[j-1];
+			}
+			buf[place]=temp;
+			for(int j=place;j<=i;j++){
+				debugf("%c",buf[j]);
+			}
+			for(int j=place;j<=i-1;j++){
+				debugf("\b");
+			}
+			place++;	
+		}
+		//debugf("buf:%x\n",buf[i]);
 	}
 	debugf("line too long\n");
 	while ((r = read(0, buf, 1)) == 1 && buf[0] != '\r' && buf[0] != '\n') {
@@ -204,9 +304,10 @@ void usage(void) {
 	debugf("usage: sh [-dix] [command-file]\n");
 	exit();
 }
-
+int sh_id;
 int main(int argc, char **argv) {
 	int r;
+	sh_id=syscall_get_sh_id();
 	int interactive = iscons(0);
 	int echocmds = 0;
 	debugf("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
@@ -217,15 +318,17 @@ int main(int argc, char **argv) {
 	ARGBEGIN {
 	case 'i':
 		interactive = 1;
+		debugf("geti\n");
 		break;
 	case 'x':
 		echocmds = 1;
+		debugf("getx\n");
 		break;
 	default:
 		usage();
 	}
 	ARGEND
-
+	printf("echocmds:%d interactive:%d\n",echocmds,interactive);
 	if (argc > 1) {
 		usage();
 	}

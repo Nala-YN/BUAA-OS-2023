@@ -7,7 +7,21 @@
 void syscall_putchar(int ch) {
 	msyscall(SYS_putchar, ch);
 }
-
+int syscall_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
+	return msyscall(SYS_set_var,sh_id,name,var,int read_only,islocal);
+}
+int syscall_list_var(int sh_id){
+	return msyscall(SYS_list_var,sh_id);
+}
+int syscall_find_var(int sh_id,char* name,char* rval){
+	return msyscall(SYS_find_var,sh_id,name,rval);
+}
+int syscall_unset_var(int sh_id,char* name){
+	return msyscall(SYS_unset_var,sh_id,name);
+}
+int syscall_get_sh_id(){
+	return msyscall(SYS_get_sh_id);
+}
 int syscall_print_cons(const void *str, u_int num) {
 	return msyscall(SYS_print_cons, str, num);
 }
