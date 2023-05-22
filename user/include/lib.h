@@ -100,7 +100,7 @@ int fsipc_dirty(u_int, u_int);
 int fsipc_remove(const char *);
 int fsipc_sync(void);
 int fsipc_incref(u_int);
-
+int fsipc_openat(u_int dir_fileid, const char *path, u_int omode, struct Fd *fd);
 // fd.c
 int close(int fd);
 int read(int fd, void *buf, u_int nbytes);
@@ -114,6 +114,7 @@ int stat(const char *path, struct Stat *);
 
 // file.c
 int open(const char *path, int mode);
+int openat(int dirfd, const char *path, int mode);
 int read_map(int fd, u_int offset, void **blk);
 int remove(const char *path);
 int ftruncate(int fd, u_int size);

@@ -25,6 +25,34 @@ struct Dev devfile = {
 // Returns:
 //  the file descriptor on success,
 //  the underlying error on failure.
+int openat(int dirfd, const char *path, int mode){
+	int r;
+	struct Fd* dir;
+	fd_lookup(dirfd, &dir);
+	struct Filefd* filedir=(struct Filefd*)dir;
+	int fileid=filedir->f_fileid;
+	struct Fd* fd;
+	fd_alloc(&fd);
+	fsipc_openat(fileid, path, mode,fd );
+	char *va;
+    struct Filefd *ffd;
+    u_int size;
+    va=fd2data(fd);
+    ffd = (struct Filefd *)fd;
+    size = ffd->f_file.f_size;
+    fileid = ffd->f_fileid;
+    for (int i = 0; i < size; i += BY2PG) {
+        r=syscall_mem_alloc(0,(void*)(va+i),PTE_D|PTE_V);
+        if(r<0){
+            return r;
+        }
+        r=fsipc_map(fileid,i,(va+i));
+        if(r<0){
+            return r;
+        }
+    }   
+    return fd2num(fd);
+}
 int open(const char *path, int mode) {
 	int r;
 
@@ -133,9 +161,6 @@ static int file_read(struct Fd *fd, void *buf, u_int n, u_int offset) {
 	memcpy(buf, (char *)fd2data(fd) + offset, n);
 	return n;
 }
-
-// Overview:
-//  Find the virtual address of the page that maps the file block
 //  starting at 'offset'.
 int read_map(int fdnum, u_int offset, void **blk) {
 	int r;
