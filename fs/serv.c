@@ -101,7 +101,11 @@ void serve_open(u_int envid, struct Fsreq_open *rq) {
 		ipc_send(envid, r, 0, 0);
 		return;
 	}
-
+	void* blk;
+	while(f->f_type==FTYPE_LNK){
+		file_get_block(f, 0, &blk);
+		file_open((char*)blk,&f); 	
+	}
 	// Save the file pointer.
 	o->o_file = f;
 
