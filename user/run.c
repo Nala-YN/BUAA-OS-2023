@@ -7,7 +7,7 @@ int main(){
 			r+=i;
 			r-=j;	
 		}
-		syscall_print_cons("1", 1);	
+		syscall_print_cons("I'm running\n", 12);	
 	}
 	debugf("finished\n");
 	return 0;

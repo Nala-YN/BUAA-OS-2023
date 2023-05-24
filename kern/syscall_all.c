@@ -517,6 +517,7 @@ struct LocalEnvVar{
 int globalVarTop=0;
 int localVarTop=0;
 int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
+	int i;
 	if(islocal){
 		 int flag=0;
         for(i=0;i<=localVarTop-1;i++){
@@ -526,7 +527,7 @@ int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
             }
         }
         if(flag){
-            debugf("Already hava a var named %s.So it is replaced by %s",name,var);
+            printk("Already hava a var named %s of shell:%d.So it is replaced by %s\n",name,sh_id,var);
             strcpy(localVar[i].var,var);
             localVar[i].read_only=read_only;
             return 0;
@@ -534,8 +535,9 @@ int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
         strcpy(localVar[localVarTop].name,name);
         strcpy(localVar[localVarTop].var,var);
         localVar[localVarTop].read_only=read_only;
+		localVar[localVarTop].sh_id=sh_id;
         localVarTop++;
-        printk("%s is set as %s",name,var);
+        printk("%s is set %s as a local var of shell:%d\n",name,var,sh_id);
 		return 0;
 	}
 	int flag=0;
@@ -546,7 +548,7 @@ int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
             }
         }
         if(flag){
-            printk("Already hava a var named %s.So it is replaced by %s\n",name,var);
+            printk("Already hava a global var named %s.So it is replaced by %s\n",name,var);
 			strcpy(globalVar[i].var,var);
 			globalVar[i].read_only=read_only;
             return 0;
@@ -555,26 +557,36 @@ int sys_set_var(int sh_id,char* name,char* var,int read_only,int islocal){
         strcpy(globalVar[globalVarTop].var,var);
 		globalVar[globalVarTop].read_only=read_only;
         globalVarTop++;
-        printk("%s is set as %s",name,var);
+        printk("global var %s is set %s\n",name,var);
 	return 0;
 }
 int sys_list_var(int sh_id){
+	int cnt=0;
 	 printk("Local var is listed as below\n");
-    for(i=0;i<=localVarTop-1;i++){
-			if(localVar[i].sh_id==sh_id)printk("name:%s var:%s\n",localVar[i].name,localVar[i].var);
+    for(int i=0;i<=localVarTop-1;i++){
+			if(localVar[i].sh_id==sh_id)printk("%d: name:%s var:%s\n",cnt++,localVar[i].name,localVar[i].var);
+    }
+	if(cnt==0){
+        printk("None\n");
     }
      printk("List ended\n");
 	printk("Global var is listed as below\n");
     for(int i=0;i<=globalVarTop-1;i++){
-         printk("name:%s var:%s\n",globalVar[i].name,globalVar[i].var);
+         printk("%d: name:%s var:%s\n",i,globalVar[i].name,globalVar[i].var);
     }
+	if(globalVarTop==0){
+		printk("None\n");
+	}
     printk("List ended\n");
 	return 0;
 }
 int sys_unset_var(int sh_id,char* name){
 	int i,j;
-    for(int i;i<=localVarTop-1;i++){
+	int flag=0;
+    for(i=0;i<=localVarTop-1;i++){
         if(strcmp(localVar[i].name,name)==0&&localVar[i].read_only==0&&sh_id==localVar[i].sh_id){
+			flag=1;
+			printk("Find a local var named %s of shell:%d and it is successfully removed\n",name,sh_id);
             for(j=i;j<=localVarTop-2;j++){
                 localVar[j]=localVar[j+1];
             }
@@ -582,8 +594,10 @@ int sys_unset_var(int sh_id,char* name){
             break;
         }
     }
-    for(int i;i<=globalVarTop-1;i++){
+    for(i=0;i<=globalVarTop-1;i++){
         if(strcmp(globalVar[i].name,name)==0&&globalVar[i].read_only==0){
+			flag=1;
+			printk("Find a global var named %s and it is successfully removed\n",name);
             for(j=i;j<=globalVarTop-2;j++){
                 globalVar[j]=globalVar[j+1];
             }
@@ -591,6 +605,7 @@ int sys_unset_var(int sh_id,char* name){
             break;
         }
     }
+	if(!flag)printk("No var named %s or it is set as read_only\n",name);
 	return 0;	
 }
 int sys_find_var(int sh_id,char* name,char* rval){
@@ -635,7 +650,7 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_set_var]=sys_set_var,
 	[SYS_list_var]=sys_list_var,
 	[SYS_unset_var]=sys_unset_var,
-	[SYS_find_var]=sys_get_var,
+	[SYS_find_var]=sys_find_var,
 	[SYS_get_sh_id]=sys_get_sh_id,
 };
 

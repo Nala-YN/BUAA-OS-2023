@@ -19,6 +19,7 @@
  *   The buffer is modified to turn the spaces after words into zero bytes ('\0'), so that the
  *   returned token is a null-terminated string.
  */
+int sh_id;
 int get_var(char* name,char* rval){
 	return syscall_find_var(sh_id,name,rval);
 }
@@ -33,31 +34,32 @@ int unset(int argc,char** argv){
 }
 int declare(int argc,char** argv){
 	int readonly=0;
-	int isglobal=0;
+	int islocal=1;
 	char name[16]={0};
 	char var[16]={0};
-	int i;
 	ARGBEGIN {
 		case 'x':
-			islocal=1;
+			islocal=0;
 			break;
 		case 'r':
 			readonly=1;
 			break;
         default:
 			break;
+	}
     ARGEND
-	if(argc==1){
+	debugf("argc:%d\n",argc);
+	if(argc==0){
 		syscall_list_var(sh_id);
 		return 0;
 	}
-	if(argc>1){
-		strcpy(name,argv[1]);
+	if(argc>=1){
+		strcpy(name,argv[0]);
 	}
-	if(argc>2){
-		strcpy(var,argv[2]);
+	if(argc>=2){
+		strcpy(var,argv[1]);
 	}
-	return syscall_set_var(sh_id,name,var,readonly,islocal);
+	return syscall_set_var(sh_id,name,&var[1],readonly,islocal);
 }
 int _gettoken(char *s, char **p1, char **p2) {
 	*p1 = 0;
@@ -72,7 +74,14 @@ int _gettoken(char *s, char **p1, char **p2) {
 	if (*s == 0) {
 		return 0;
 	}
-
+	if (strchr("\"", *s)){
+		*p1 = ++s;
+		while(*s != '\"')
+			 s++;
+		*s = 0;
+		*p2 = ++s;
+		return 'w';
+	}
 	if (strchr(SYMBOLS, *s)) {
 		int t = *s;
 		*p1 = s;
@@ -105,7 +114,7 @@ int gettoken(char *s, char **p1) {
 
 #define MAXARGS 128
 
-int parsecmd(char **argv, int *rightpipe) {
+int parsecmd(char **argv, int *rightpipe,int* hangup) {
 	int argc = 0;
 	while (1) {
 		char *t;
@@ -146,14 +155,27 @@ int parsecmd(char **argv, int *rightpipe) {
             dup(fd, 1);
             close(fd);
 			break;
-		/*case ';':
-			if ((rightpipe = (int*)fork()) == 0) {
-                    return parsecmd(argv,rightpipe);
-                } else {
-					rightpipe=0;
+		case ';':
+			if ((*rightpipe = fork()) == 0) {
                     return argc;
+                } else {
+					wait(*rightpipe);
+					*rightpipe=0;
+					*hangup=0;
+					return parsecmd(argv,rightpipe,hangup);
                 }
-                break;*/	
+                break;
+		case '&':
+			if((*rightpipe=fork())==0){
+				*hangup=1;
+				*rightpipe=0;
+				return argc;
+			}
+			else{
+				*rightpipe=0;
+				*hangup=0;
+				return parsecmd(argv,rightpipe,hangup);
+			}	
 		case '|':;
 			/*
 			 * First, allocate a pipe.
@@ -177,7 +199,7 @@ int parsecmd(char **argv, int *rightpipe) {
                     dup(p[0], 0);
                     close(p[0]);
                     close(p[1]);
-                    return parsecmd(argv,rightpipe);
+                    return parsecmd(argv,rightpipe,hangup);
                 } else {
                     dup(p[1], 1);
                     close(p[1]);
@@ -193,19 +215,46 @@ int parsecmd(char **argv, int *rightpipe) {
 
 void runcmd(char *s) {
 	gettoken(s, 0);
-
+	int r;
 	char *argv[MAXARGS];
 	int rightpipe = 0;
-	int argc = parsecmd(argv, &rightpipe);
+	int hangup=0;
+	int argc = parsecmd(argv, &rightpipe,&hangup);
 	if (argc == 0) {
 		return;
 	}
 	argv[argc] = 0;
-
+	if(strcmp(argv[0],"declare")==0){
+		declare(argc,argv);
+		exit();
+	}
+	if(strcmp(argv[0],"unset")==0){
+		unset(argc,argv);
+		exit();
+	}
+	char buf[32];
+	for(int i=0;i<=argc-1;i++){
+		if(argv[i][0]=='#'){
+			r=get_var(argv[i]+1,buf);
+			if(r){
+				strcpy(argv[i],buf);
+			}
+			else{
+				user_panic("No such var!\n");
+			}
+		}
+	}
 	int child = spawn(argv[0], argv);
 	close_all();
 	if (child >= 0) {
-		wait(child);
+		if(hangup){
+			if(fork()==0){
+				wait(child);
+			}
+		}
+		else{
+			wait(child);
+		}
 	} else {
 		debugf("spawn %s: %d\n", argv[0], child);
 	}
@@ -304,12 +353,11 @@ void usage(void) {
 	debugf("usage: sh [-dix] [command-file]\n");
 	exit();
 }
-int sh_id;
 int main(int argc, char **argv) {
 	int r;
 	sh_id=syscall_get_sh_id();
 	int interactive = iscons(0);
-	int echocmds = 0;
+	int echocmds = 1;
 	debugf("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
 	debugf("::                                                         ::\n");
 	debugf("::                     MOS Shell 2023                      ::\n");
