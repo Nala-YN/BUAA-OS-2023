@@ -212,7 +212,30 @@ int parsecmd(char **argv, int *rightpipe,int* hangup) {
 
 	return argc;
 }
-
+int history[64];
+int maxline=0;
+int nowline=0;
+void get_history(int nowline,char* buf){
+	int fd=open(".history",O_RDWR);
+	int place=nowline==0?0:history[nowline-1];
+	int cnt=history[nowline]-place;
+	seek(fd,place);
+	debugf("place:%d\n",place);
+	readn(fd,buf,cnt);
+	buf[strlen(buf-1)]=0;
+	debugf("count:%d\n",cnt);
+	debugf("read:%s\n",buf);
+	close(fd);
+}
+void store_history(char* buf){
+	int fd=open(".history",O_RDWR);
+	int place=maxline==0?0:history[maxline-1];
+	seek(fd,place);
+	history[maxline]=(maxline==0?0:history[maxline-1])+strlen(buf);
+	write(fd,buf,strlen(buf));
+	maxline++;
+	close(fd);
+}
 void runcmd(char *s) {
 	gettoken(s, 0);
 	int r;
@@ -278,7 +301,11 @@ void readline(char *buf, u_int n) {
 		}
 		if (buf[i] == '\r' || buf[i] == '\n') {
             debugf("\n");
-            buf[i] = 0;
+            buf[i+1] = 0;
+			buf[i]='\n';
+			store_history(buf);
+			buf[i]=0;
+			nowline=maxline;
             return;
         }
 		//debugf("i:%d place:%d\n",i,place); 
@@ -297,6 +324,43 @@ void readline(char *buf, u_int n) {
 					place++;
 					debugf("%c%c%c",27,91,67);
 				}
+			}
+			else if(temp=='A'||temp=='B'){
+				if(temp=='A'){
+					if(nowline>0){
+						nowline--;
+					}	
+					else{
+						i--;
+						continue;
+					}
+				}
+				else{
+					if(nowline<maxline-1){
+						nowline++;
+					}
+					else{
+						i--;
+						continue;
+					}
+				}
+				char line[64];
+				get_history(nowline,line);
+				for(int j=0;j<=place-1;j++){
+					debugf("\b");
+				}
+				for(int j=0;j<=i-1;j++){
+					debugf(" ");
+				}
+				for(int j=0;j<=i-1;j++){
+					debugf("\b");
+				}
+				for(int j=0;j<=strlen(line)-1;j++){
+					debugf("%s",line);
+				}
+				place=strlen(line);
+				i=strlen(line)-1;
+				continue;
 			}
 			i--;
 			continue;
@@ -377,6 +441,7 @@ int main(int argc, char **argv) {
 	}
 	ARGEND
 	printf("echocmds:%d interactive:%d\n",echocmds,interactive);
+	user_creat(".history",0);
 	if (argc > 1) {
 		usage();
 	}

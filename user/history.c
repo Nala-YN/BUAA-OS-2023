@@ -6,7 +6,7 @@ int main(){
 	}
 	else{
 		debugf("open .history\n");
-	}
+}
 	char buf[1024];
 	r=readn(r,buf,1024);
 	if(r<0){
