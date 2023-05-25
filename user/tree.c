@@ -20,20 +20,16 @@ void tree(char *path, int depth) {
     while ((n = readn(fd, &f, sizeof f)) == sizeof f) {
 		if (f.f_name[0]) {
 			for (i = 0; i < depth; i++){
-                    debugf("|   ");
+                    debugf("    ");
 			 }
                 debugf( "|--");
                 debugf( "%s\n",f.f_name);
 			if (f.f_type == FTYPE_DIR){
-				for (i = 0; i < depth; i++){
-					debugf( "|   ");
-				}
-				debugf( "|--");
-				debugf( "%s\n",f.f_name);
+				memset(newPath,0,128);
 				addStr(newPath, path);
 				addStr(newPath, f.f_name);
 				addStr(newPath,"/");
-				tree(newPath, depth++);
+				tree(newPath, depth+1);
 			}
 		}
 	}
@@ -41,7 +37,12 @@ void tree(char *path, int depth) {
 }
 
 int main(int argc, char **argv)
-{
-    tree("/", 0);
+{	
+	if(argc>1){
+		tree(argv[1],0);
+	}
+	else{
+		tree("/",0);
+	}
 	exit();
 }

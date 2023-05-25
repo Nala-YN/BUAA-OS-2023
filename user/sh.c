@@ -220,18 +220,20 @@ void get_history(int nowline,char* buf){
 	int place=nowline==0?0:history[nowline-1];
 	int cnt=history[nowline]-place;
 	seek(fd,place);
-	debugf("place:%d\n",place);
-	readn(fd,buf,cnt);
-	buf[strlen(buf-1)]=0;
-	debugf("count:%d\n",cnt);
-	debugf("read:%s\n",buf);
+	read(fd,buf,cnt);
+	//debugf("len:%d\n",strlen(buf));
+	buf[strlen(buf)-1]=0;
+	//debugf("count:%d\n",cnt);
+	//debugf("read:%s\n\n",buf);
 	close(fd);
 }
 void store_history(char* buf){
 	int fd=open(".history",O_RDWR);
 	int place=maxline==0?0:history[maxline-1];
 	seek(fd,place);
+	//debugf("%d\n",place);
 	history[maxline]=(maxline==0?0:history[maxline-1])+strlen(buf);
+	//debugf("%d\n",
 	write(fd,buf,strlen(buf));
 	maxline++;
 	close(fd);
@@ -345,7 +347,9 @@ void readline(char *buf, u_int n) {
 					}
 				}
 				char line[64];
+				memset(line,0,64);
 				get_history(nowline,line);
+				//debugf("line:%s\n\n",line);
 				for(int j=0;j<=place-1;j++){
 					debugf("\b");
 				}
@@ -355,9 +359,8 @@ void readline(char *buf, u_int n) {
 				for(int j=0;j<=i-1;j++){
 					debugf("\b");
 				}
-				for(int j=0;j<=strlen(line)-1;j++){
-					debugf("%s",line);
-				}
+				debugf("%s",line);
+				strcpy(buf,line);
 				place=strlen(line);
 				i=strlen(line)-1;
 				continue;
