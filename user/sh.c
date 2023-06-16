@@ -426,6 +426,7 @@ void usage(void) {
 int main(int argc, char **argv) {
 	int r;
 	sh_id=syscall_get_sh_id();
+	debugf("myEnv_id:%x\n",syscall_getenvid());
 	int interactive = iscons(0);
 	int echocmds = 1;
 	debugf("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");

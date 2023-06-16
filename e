@@ -233,12 +233,12 @@ rm serv.o check.o
 make[2]: 离开目录“/home/git/21373161/fs”
 mkdir -p target
 mips-linux-gnu-ld -EL -G 0 -static -n -nostdlib --fatal-warnings -EL -G 0 -static -n -nostdlib --fatal-warnings -o target/mos -N -T kernel.lds lib/*.o init/*.o kern/*.o user/bare/*.x user/*.x fs/*.x
-make --directory=fs image fs-files="../tests/lab6_2/fs/aaa.txt ../tests/lab6_2/fs/lorem ../tests/lab6_2/fs/script ../tests/lab6_2/fs/testshell.sh"
+make --directory=fs image fs-files="../tests/lab6_2/fs/aaa.txt ../tests/lab6_2/fs/lorem ../tests/lab6_2/fs/script ../tests/lab6_2/fs/test ../tests/lab6_2/fs/testshell.sh"
 make[2]: 进入目录“/home/git/21373161/fs”
 dd if=/dev/zero of=../target/fs.img bs=4096 count=1024 2>/dev/null
 # using awk to remove paths with identical basename from FSIMGFILES
 ../tools/fsformat ../target/fs.img \
-	$(printf '%s\n' rootfs/motd rootfs/newmotd ../user/num.b ../user/echo.b ../user/halt.b ../user/ls.b ../user/sh.b ../user/cat.b ../user/tree.b ../user/run.b ../user/history.b ../user/mkdir.b ../user/touch.b ../user/testpipe.b ../user/testpiperace.b ../user/testptelibrary.b ../user/testarg.b ../user/testbss.b ../user/testfdsharing.b ../user/pingpong.b ../user/init.b ../tests/lab6_2/fs/aaa.txt ../tests/lab6_2/fs/lorem ../tests/lab6_2/fs/script ../tests/lab6_2/fs/testshell.sh | awk -F/ '{ ns[$NF]=$0 } END { for (n in ns) { print ns[n] } }')
+	$(printf '%s\n' rootfs/motd rootfs/newmotd ../user/num.b ../user/echo.b ../user/halt.b ../user/ls.b ../user/sh.b ../user/cat.b ../user/tree.b ../user/run.b ../user/history.b ../user/mkdir.b ../user/touch.b ../user/testpipe.b ../user/testpiperace.b ../user/testptelibrary.b ../user/testarg.b ../user/testbss.b ../user/testfdsharing.b ../user/pingpong.b ../user/init.b ../tests/lab6_2/fs/aaa.txt ../tests/lab6_2/fs/lorem ../tests/lab6_2/fs/script ../tests/lab6_2/fs/test ../tests/lab6_2/fs/testshell.sh | awk -F/ '{ ns[$NF]=$0 } END { for (n in ns) { print ns[n] } }')
 writing regular file '../tests/lab6_2/fs/aaa.txt' into disk
 writing regular file '../user/run.b' into disk
 writing regular file '../user/testarg.b' into disk
@@ -255,6 +255,7 @@ writing regular file '../user/num.b' into disk
 writing regular file '../tests/lab6_2/fs/lorem' into disk
 writing regular file '../user/touch.b' into disk
 writing regular file '../user/mkdir.b' into disk
+writing regular file '../tests/lab6_2/fs/test' into disk
 writing regular file '../user/testfdsharing.b' into disk
 writing regular file '../tests/lab6_2/fs/testshell.sh' into disk
 writing regular file '../tests/lab6_2/fs/script' into disk

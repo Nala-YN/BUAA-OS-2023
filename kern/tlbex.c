@@ -5,7 +5,7 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 	struct Page *p = NULL;
 
 	if (va < UTEMP) {
-		panic("address too low");
+		panic("address too low:%x\n",curenv->env_id);
 	}
 
 	if (va >= USTACKTOP && va < USTACKTOP + BY2PG) {
