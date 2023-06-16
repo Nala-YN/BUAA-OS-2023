@@ -48,7 +48,7 @@ int declare(int argc,char** argv){
 			break;
 	}
     ARGEND
-	debugf("argc:%d\n",argc);
+	//debugf("argc:%d\n",argc);
 	if(argc==0){
 		syscall_list_var(sh_id);
 		return 0;
@@ -150,7 +150,10 @@ int parsecmd(char **argv, int *rightpipe,int* hangup) {
 			}
 			// Open 't' for writing, dup it onto fd 1, and then close the original fd.
 			/* Exercise 6.5: Your code here. (2/3) */
-			if ((r = open(t, O_WRONLY)) < 0)user_panic("> open failed");
+			if ((r = open(t, O_WRONLY)) < 0){
+				user_creat(t,0);
+				r=open(t,O_WRONLY);
+			}
             fd = r;
             dup(fd, 1);
             close(fd);
