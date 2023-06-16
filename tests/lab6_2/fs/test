@@ -1,0 +1,48 @@
+ls
+ls|cat
+
+ls;ls
+ls;cat aaa.txt
+ls;
+;ls
+
+run&ls
+run&
+
+echo "ls.b | cat.b"
+
+ls
+history
+ls
+history
+history
+
+declare -r 111 =222
+declare -rx 111 =222
+unset 111
+declare 222 =333
+declare -x 222 =333
+unset 222
+declare
+declare 111 =222
+declare -x 111 =222
+unset 111
+declare
+declare aaa =bbb
+declare -x ccc =ddd
+echo #aaa
+echo #ccc
+sh
+echo #aaa
+echo #ccc
+
+mkdir /dir1
+mkdir /dir2
+touch /dir1/file1
+touch /dir1/file2
+touch /dir2/file1
+touch /dir2/file2
+tree
+tree /dir1
+ls > new.txt
+ls
